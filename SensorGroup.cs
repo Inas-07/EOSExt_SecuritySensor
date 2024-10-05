@@ -22,6 +22,11 @@ namespace EOSExt.SecuritySensor
 
         public SensorGroupSettings Settings { get; private set; }
 
+        /*
+         FIXME: 目前的实现是有问题的。
+        正确的实现应该将“sensor被触发，需要开关sensor”与“开关sensor事件”分开来处理。
+        当前的做法是：sensor被触发的“开关”效果是通过“开关sensor事件”实现的。
+         */
         public StateReplicator<SensorGroupState> StateReplicator { get; private set; }
 
         public IEnumerable<GameObject> BasicSensors => basicSensors;
