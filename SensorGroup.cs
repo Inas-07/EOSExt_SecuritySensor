@@ -9,6 +9,7 @@ using FloLib.Networks.Replications;
 using GTFO.API.Extensions;
 using UnityEngine;
 using SNetwork;
+using TMPro;
 
 namespace EOSExt.SecuritySensor
 {
@@ -120,6 +121,28 @@ namespace EOSExt.SecuritySensor
 
                 var sensorCollider = sensorGO.AddComponent<SensorCollider>();
                 sensorCollider.Setup(sensorSetting, sg);
+
+                sensorGO.transform.GetChild(0).GetChild(1)
+                    .gameObject.GetComponentInChildren<Renderer>()
+                    .material.SetColor("_ColorA", sensorSetting.Color.ToUnityColor());
+
+                var infoGO = sensorGO.transform.GetChild(0).GetChild(2); //.gameObject.GetComponentInChildren<TextMeshPro>();
+                var corruptedTMPProGO = infoGO.GetChild(0).gameObject;
+                corruptedTMPProGO.transform.SetParent(null);
+                GameObject.Destroy(corruptedTMPProGO);
+
+                var TMPProGO = VanillaTMPPros.Instantiate(infoGO.gameObject);
+
+                var text = TMPProGO.GetComponent<TextMeshPro>();
+                if(text != null)
+                {
+                    text.SetText(sensorSetting.Text);
+                    text.m_fontColor = text.m_fontColor32 = sensorSetting.TextColor.ToUnityColor();
+                }
+                else
+                {
+                    EOSLogger.Error("NO TEXT!");
+                }
                 sensorGO.SetActive(true);
             }
 
