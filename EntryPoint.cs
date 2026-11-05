@@ -2,6 +2,7 @@
 using BepInEx.Unity.IL2CPP;
 using ExtraObjectiveSetup.Utils;
 using ExtraObjectiveSetup.JSON;
+using ExtraObjectiveSetup.JSON.MTFOPartialData;
 using GTFO.API;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
@@ -11,6 +12,7 @@ namespace EOSExt.SecuritySensor
 {
     [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("GTFO.FloLib", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("Amor.AmorLib", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.ExtraObjectiveSetup", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MTFOPartialDataUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(InjectLibUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
