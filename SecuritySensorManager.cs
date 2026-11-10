@@ -21,6 +21,7 @@ namespace EOSExt.SecuritySensor
     public enum SensorEventType
     {
         ToggleSensorGroupState = 400,
+        ToggleAllSensorGroups = 401,
     }
 
     public sealed class SecuritySensorManager : GenericExpeditionDefinitionManager<SensorGroupSettings>
@@ -29,45 +30,29 @@ namespace EOSExt.SecuritySensor
 
         private List<SensorGroup> sensorGroups = new();
 
-        private Dictionary<IntPtr, int> sensorGroupIndex = new();
+        internal static readonly SensorSync SyncTrigger = new();
 
         protected override string DEFINITION_NAME => "SecuritySensor";
 
         public void BuildSensorGroup(SensorGroupSettings sensorGroupSettings)
         {
-            int groupIndex = sensorGroups.Count;
+            int groupIndex = sensorGroupSettings.Index == uint.MaxValue ? sensorGroups.Count : (int)sensorGroupSettings.Index;
             var sg = SensorGroup.Instantiate(sensorGroupSettings, groupIndex);
             sensorGroups.Add(sg);
-            
-            foreach (var go in sg.BasicSensors)
-            {
-                sensorGroupIndex[go.Pointer] = groupIndex;
-            }
-
-            foreach (var m in sg.MovableSensors)
-            {
-                sensorGroupIndex[m.movableGO.Pointer] = groupIndex;
-            }
 
             EOSLogger.Debug($"SensorGroup_{groupIndex} built");
         }
 
-        internal void SensorTriggered(IntPtr pointer)
-        {
-            if(!sensorGroupIndex.ContainsKey(pointer))
-            {
-                EOSLogger.Error($"Triggering a sensor but doesn't find its corresponding sensor group! This should not happen!");
-                return;
-            }
+        private SensorGroup FindSensorGroup(int groupIndex) => sensorGroups.Find(sg => sg.SensorGroupIndex == groupIndex);
 
-            int groupIndex = sensorGroupIndex[pointer];
-            if(groupIndex < 0 || groupIndex >= sensorGroups.Count)
+        internal void TriggerSensor(int groupIndex)
+        {
+            var sg = FindSensorGroup(groupIndex);
+            if (sg == null)
             {
                 EOSLogger.Error($"TriggerSensor: invalid SensorGroup index {groupIndex}");
                 return;
             }
-
-            var sg = sensorGroups[groupIndex];
             //// MovableSensor would trigger `SensorCollider` cuz its game object is not (and cannot) set to inactive
             //// So do some special case handling here
             //if (sg.sensorGroup.StateReplicator.State.status != ActiveState.ENABLED)
@@ -91,20 +76,25 @@ namespace EOSExt.SecuritySensor
         {
             sensorGroups.ForEach(sg => sg.Destroy());
             sensorGroups.Clear();
-            sensorGroupIndex.Clear();
         }
 
         private void ToggleSensorGroup(WardenObjectiveEventData e)
         {
             int groupIndex = e.Count;
-            bool active = e.Enabled;
-            if(groupIndex < 0 || groupIndex >= sensorGroups.Count)
+            var sg = FindSensorGroup(groupIndex);
+            if (sg == null)
             {
                 EOSLogger.Error($"ToggleSensorGroup: invalid SensorGroup index {groupIndex}");
                 return;
             }
 
-            sensorGroups[groupIndex].ChangeToState(active ? ActiveState.ENABLED : ActiveState.DISABLED);
+            sg.ChangeToState(e.Enabled ? ActiveState.ENABLED : ActiveState.DISABLED);
+        }
+
+        private void ToggleAllSensorGroups(WardenObjectiveEventData e)
+        {
+            ActiveState state = e.Enabled ? ActiveState.ENABLED : ActiveState.DISABLED;
+            sensorGroups.ForEach(sg => sg.ChangeToState(state));
         }
 
         private SecuritySensorManager() : base()
@@ -117,8 +107,12 @@ namespace EOSExt.SecuritySensor
             };
 
             EOSWardenEventManager.Current.AddEventDefinition(SensorEventType.ToggleSensorGroupState.ToString(), (int)SensorEventType.ToggleSensorGroupState, ToggleSensorGroup);
+            EOSWardenEventManager.Current.AddEventDefinition(SensorEventType.ToggleAllSensorGroups.ToString(), (int)SensorEventType.ToggleAllSensorGroups, ToggleAllSensorGroups);
         }
 
-        static SecuritySensorManager() { }
+        static SecuritySensorManager()
+        {
+            if (!SyncTrigger.IsSetup) SyncTrigger.Setup();
+        }
     }
 }

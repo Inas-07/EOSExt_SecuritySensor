@@ -1,5 +1,6 @@
 ﻿using EOSExt.SecuritySensor.Definition;
 using Player;
+using SNetwork;
 using UnityEngine;
 
 namespace EOSExt.SecuritySensor.Component
@@ -45,7 +46,7 @@ namespace EOSExt.SecuritySensor.Component
 
             if (current_playersInSensor > last_playersInSensor)
             {
-                SecuritySensorManager.Current.SensorTriggered(gameObject.Pointer);
+                SecuritySensorManager.SyncTrigger.Send(Parent.SensorGroupIndex, null, SNet_ChannelType.GameOrderCritical);
             }
 
             last_playersInSensor = current_playersInSensor;

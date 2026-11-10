@@ -36,6 +36,7 @@
     <Compile Include="SecuritySensorManager.cs" />
     <Compile Include="SensorGroup.cs" />
     <Compile Include="SensorState.cs" />
+    <Compile Include="SensorSync.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Dependencies.props" />
