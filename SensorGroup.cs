@@ -5,7 +5,7 @@ using EOSExt.SecuritySensor.Component;
 using EOSExt.SecuritySensor.Definition;
 using ExtraObjectiveSetup;
 using ExtraObjectiveSetup.Utils;
-using FloLib.Networks.Replications;
+using AmorLib.Networking.StateReplicators;
 using GTFO.API.Extensions;
 using UnityEngine;
 using SNetwork;
@@ -153,7 +153,7 @@ namespace EOSExt.SecuritySensor
             }
             else
             {
-                sg.StateReplicator = StateReplicator<SensorGroupState>.Create(allotedID, new() { status = ActiveState.ENABLED }, LifeTimeType.Level);
+                sg.StateReplicator = StateReplicator<SensorGroupState>.Create(allotedID, new() { status = ActiveState.ENABLED }, LifeTimeType.Session);
                 sg.StateReplicator.OnStateChanged += sg.OnStateChanged;
             }
 
