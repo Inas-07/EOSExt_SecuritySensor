@@ -21,7 +21,7 @@ namespace EOSExt.SecuritySensor
     {
         public const string AUTHOR = "Inas";
         public const string PLUGIN_NAME = "EOSExt.SecuritySensor";
-        public const string VERSION = "1.1.7";
+        public const string VERSION = "1.2.0";
 
         private Harmony m_Harmony;
 
